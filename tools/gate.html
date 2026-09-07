@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Ouijatari</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500&family=Instrument+Serif&display=swap">
+<style>
+:root{
+  --ground:#E7EAE7; --surface:#FBFCFB; --surface-2:#DFE4E1;
+  --ink:#141A18; --ink-2:#4B5754; --ink-3:#78847F;
+  --line:#C9D1CC; --patina:#2C6E5C; --signal:#8A5A16; --danger:#A33A2A;
+  --shadow:0 1px 2px rgba(20,26,24,.06),0 8px 24px -16px rgba(20,26,24,.28);
+  --serif:"Instrument Serif",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans","Helvetica Neue",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,"SF Mono",Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0D1211; --surface:#141B19; --surface-2:#1D2624;
+    --ink:#E6EBE8; --ink-2:#A3AFAA; --ink-3:#78857F;
+    --line:#26312E; --patina:#5DBBA0; --signal:#DFAE68; --danger:#E08878;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -18px rgba(0,0,0,.8);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#0D1211; --surface:#141B19; --surface-2:#1D2624;
+  --ink:#E6EBE8; --ink-2:#A3AFAA; --ink-3:#78857F;
+  --line:#26312E; --patina:#5DBBA0; --signal:#DFAE68; --danger:#E08878;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px -18px rgba(0,0,0,.8);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; background:var(--ground); color:var(--ink);
+  font-family:var(--sans); font-size:14px; line-height:1.55;
+  display:flex; align-items:center; justify-content:center; padding:24px;
+  -webkit-font-smoothing:antialiased;
+}
+.gate{width:100%; max-width:380px}
+.mark{
+  font-family:var(--mono); font-size:10.5px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--ink-3); margin:0 0 10px;
+}
+h1{font-family:var(--serif); font-weight:400; font-size:34px; line-height:1; margin:0 0 6px}
+.sub{margin:0 0 22px; color:var(--ink-2); font-size:13px}
+form{background:var(--surface); border:1px solid var(--line); border-radius:3px; box-shadow:var(--shadow); padding:18px}
+label{
+  display:block; font-family:var(--mono); font-size:10.5px; letter-spacing:.12em;
+  text-transform:uppercase; color:var(--ink-3); margin:0 0 7px;
+}
+input{
+  width:100%; font-family:var(--mono); font-size:15px; letter-spacing:.06em;
+  padding:9px 10px; border:1px solid var(--line); border-radius:2px;
+  background:var(--ground); color:var(--ink); -webkit-appearance:none; appearance:none;
+}
+input:focus-visible{outline:2px solid var(--signal); outline-offset:2px; border-color:transparent}
+button{
+  width:100%; margin-top:12px; font-family:var(--mono); font-size:10.5px;
+  letter-spacing:.14em; text-transform:uppercase; font-weight:500;
+  padding:10px 12px; border:1px solid var(--line); border-radius:2px;
+  background:var(--surface-2); color:var(--ink); cursor:pointer;
+}
+button:hover:not(:disabled){border-color:var(--ink-3)}
+button:disabled{opacity:.55; cursor:progress}
+button:focus-visible{outline:2px solid var(--signal); outline-offset:2px}
+.status{
+  min-height:1.5em; margin:11px 0 0; font-family:var(--mono); font-size:11px;
+  letter-spacing:.05em; color:var(--ink-3);
+}
+.status[data-tone="error"]{color:var(--danger)}
+.status[data-tone="busy"]{color:var(--patina)}
+.foot{
+  margin:16px 0 0; font-family:var(--mono); font-size:10px; letter-spacing:.07em;
+  text-transform:uppercase; color:var(--ink-3);
+}
+.nojs{color:var(--danger)}
+</style>
+</head>
+<body>
+<main class="gate">
+  <p class="mark">Restricted</p>
+  <h1>Ouijatari</h1>
+  <p class="sub">This document is encrypted. Enter the passphrase to decrypt it in your browser.</p>
+  <form id="f" autocomplete="off">
+    <label for="pw">Passphrase</label>
+    <input id="pw" type="password" autocomplete="current-password" autofocus spellcheck="false">
+    <button id="go" type="submit">Decrypt</button>
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+  </form>
+  <p class="foot" id="foot">AES-256-GCM &middot; PBKDF2-SHA256</p>
+  <noscript><p class="foot nojs">JavaScript is required to decrypt this document.</p></noscript>
+</main>
+
+<script type="application/json" id="payload">__PAYLOAD__</script>
+<script>
+(function(){
+  "use strict";
+  var PAYLOAD = JSON.parse(document.getElementById("payload").textContent);
+  var SS_KEY = "ouijatari.pw";
+  var form = document.getElementById("f");
+  var input = document.getElementById("pw");
+  var button = document.getElementById("go");
+  var status = document.getElementById("status");
+  var foot = document.getElementById("foot");
+
+  foot.textContent = "AES-256-GCM · PBKDF2-SHA256 · " +
+    PAYLOAD.kdf.iterations.toLocaleString("en-US") + " iterations";
+
+  function say(text, tone){
+    status.textContent = text;
+    if (tone) { status.setAttribute("data-tone", tone); } else { status.removeAttribute("data-tone"); }
+  }
+
+  function b64(s){
+    var bin = atob(s), out = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) { out[i] = bin.charCodeAt(i); }
+    return out;
+  }
+
+  function session(op, value){
+    try { return op === "get" ? sessionStorage.getItem(SS_KEY)
+        : op === "set" ? sessionStorage.setItem(SS_KEY, value)
+        : sessionStorage.removeItem(SS_KEY); }
+    catch (e) { return null; }
+  }
+
+  async function decrypt(password){
+    var enc = new TextEncoder();
+    var base = await crypto.subtle.importKey("raw", enc.encode(password), "PBKDF2", false, ["deriveKey"]);
+    var key = await crypto.subtle.deriveKey(
+      { name:"PBKDF2", salt:b64(PAYLOAD.kdf.salt), iterations:PAYLOAD.kdf.iterations, hash:PAYLOAD.kdf.hash },
+      base, { name:"AES-GCM", length:256 }, false, ["decrypt"]
+    );
+    var plain = await crypto.subtle.decrypt(
+      { name:"AES-GCM", iv:b64(PAYLOAD.iv) }, key, b64(PAYLOAD.ct)
+    );
+    return new TextDecoder().decode(plain);
+  }
+
+  function render(html){
+    document.open();
+    document.write(html);
+    document.close();
+  }
+
+  async function attempt(password, silent){
+    if (!password) { say("Enter the passphrase.", "error"); input.focus(); return; }
+    button.disabled = true;
+    say("Decrypting…", "busy");
+    // Yield a frame so the busy state paints before the key derivation blocks.
+    await new Promise(function(r){ requestAnimationFrame(function(){ setTimeout(r, 0); }); });
+    try {
+      var html = await decrypt(password);
+      session("set", password);
+      render(html);
+    } catch (err) {
+      session("clear");
+      button.disabled = false;
+      if (silent) { say(""); return; }
+      say("Incorrect passphrase.", "error");
+      input.value = "";
+      input.focus();
+    }
+  }
+
+  if (!(window.crypto && window.crypto.subtle)) {
+    say("This browser cannot decrypt the document (WebCrypto unavailable over an insecure origin).", "error");
+    button.disabled = true;
+    input.disabled = true;
+    return;
+  }
+
+  form.addEventListener("submit", function(e){
+    e.preventDefault();
+    attempt(input.value, false);
+  });
+  input.addEventListener("input", function(){
+    if (status.getAttribute("data-tone") === "error") { say(""); }
+  });
+
+  var remembered = session("get");
+  if (remembered) { attempt(remembered, true); }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+# The plaintext page must never be committed: this repository is public, and
+# the encrypted index.html is the only copy that is safe to publish.
+# Recover an editable source with `node tools/decrypt.mjs`.
+/src/
+
+# Project brief — contains costs and scheduling. Not for publication.
+/spec.md
+
+.DS_Store
+node_modules/
