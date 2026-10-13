@@ -6,5 +6,10 @@
 # Project brief — contains costs and scheduling. Not for publication.
 /spec.md
 
+# Source artwork and the gallery model — unpublished, and far too large for
+# git. tools/build-data.mjs turns them into src/data.js.
+/space_and_plates/
+
 .DS_Store
 node_modules/
+tech_spec.md

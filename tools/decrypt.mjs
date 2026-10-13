@@ -1,18 +1,20 @@
 #!/usr/bin/env node
-// Recovers src/index.html from the committed, encrypted index.html.
+// Recovers src/ — index.html and the scripts bundled into it — from the
+// committed, encrypted index.html.
 // The ciphertext is the versioned copy of record, so this is how you get an
 // editable source back on a machine that does not already have one.
 //
-//   node tools/decrypt.mjs            # prompts, writes src/index.html
-//   node tools/decrypt.mjs --stdout   # prints the plaintext instead
-import { readFile, writeFile } from "node:fs/promises";
+//   node tools/decrypt.mjs            # prompts, writes src/
+//   node tools/decrypt.mjs --stdout   # prints the bundled plaintext instead
+import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { decrypt, readPassword } from "./lib.mjs";
+import { extract } from "./bundle.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const INPUT = join(root, "index.html");
-const OUTPUT = join(root, "src", "index.html");
+const OUTPUT = join(root, "src");
 const toStdout = process.argv.includes("--stdout");
 
 const published = await readFile(INPUT, "utf8");
@@ -35,6 +37,10 @@ try {
 if (toStdout) {
   process.stdout.write(plaintext);
 } else {
-  await writeFile(OUTPUT, plaintext);
-  console.error(`Wrote src/index.html (${(Buffer.byteLength(plaintext) / 1024).toFixed(1)} kB).`);
+  const { html, files } = extract(plaintext);
+  await mkdir(OUTPUT, { recursive: true });
+  for (const [name, text] of [["index.html", html], ...files]) {
+    await writeFile(join(OUTPUT, name), text);
+    console.error(`Wrote src/${name} (${(Buffer.byteLength(text) / 1024).toFixed(1)} kB).`);
+  }
 }
