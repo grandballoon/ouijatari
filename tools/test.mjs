@@ -310,6 +310,10 @@ srcTest("the page script renders day 157 without error", async () => {
   assert.equal((written("#archiveGrid").match(/class="thumb"/g) || []).length, 300);
   assert.match(written("#msg"), /Day 157[\s\S]*Mounting point:<\/span> Nail [A-I]-\d\d, /);
   assert.equal(written("#cands").match(/<tr/g).length, 6);
+  const O = ctx.window.Ouijatari;
+  assert.equal((written("#permitted").match(/<li>/g) || []).length, O.permittedKinds(O.PHASES.at(-1)).length);
+  assert.equal(nodes.get("#dayThumb").style.left, "100%");
+  assert.equal(nodes.has("#params"), false, "the satellite parameters panel is gone");
   assert.equal(JSON.parse(written("#archive", "textContent")).growth_field_state.length, 156);
   assert.ok(!/undefined|NaN/.test(written("#msg") + written("#fcap", "textContent") + written("#trace") + written("#platefig")));
 });
